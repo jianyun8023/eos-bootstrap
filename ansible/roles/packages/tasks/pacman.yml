@@ -1,6 +1,39 @@
 ---
+- name: Check for power-profiles-daemon before installing TLP
+  ansible.builtin.command:
+    cmd: pacman -Qq
+  register: packages_installed_before_tlp
+  changed_when: false
+  when: "'tlp' in pacman_packages or 'tlp-pd' in pacman_packages"
+
+- name: Stop power-profiles-daemon before installing TLP
+  ansible.builtin.systemd_service:
+    name: power-profiles-daemon.service
+    state: stopped
+    enabled: false
+  when:
+    - >-
+      'power-profiles-daemon' in
+      packages_installed_before_tlp.stdout_lines | default([])
+    - "'tlp' in pacman_packages or 'tlp-pd' in pacman_packages"
+
+- name: Remove power-profiles-daemon before installing TLP
+  community.general.pacman:
+    name: power-profiles-daemon
+    state: absent
+  when:
+    - >-
+      'power-profiles-daemon' in
+      packages_installed_before_tlp.stdout_lines | default([])
+    - "'tlp' in pacman_packages or 'tlp-pd' in pacman_packages"
+
 - name: Install pacman packages
   community.general.pacman:
     name: "{{ pacman_packages }}"
     state: present
     update_cache: true
+
+- name: Remove superseded EndeavourOS desktop packages
+  community.general.pacman:
+    name: "{{ obsolete_desktop_packages }}"
+    state: absent

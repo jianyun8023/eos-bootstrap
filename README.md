@@ -10,12 +10,25 @@ cd ~/Projects/eos-bootstrap
 ./bootstrap.sh
 ```
 
+To apply an existing local dotfiles checkout instead of cloning
+`dotfiles_repo`, set `DOTFILES_SOURCE_DIR`:
+
+```bash
+DOTFILES_SOURCE_DIR="$HOME/dotfiles" ./bootstrap.sh
+```
+
 ## What it does
 
 1. Installs `ansible` and `paru` (skip if already present).
 2. Runs the Ansible playbook in `ansible/` (packages, mise, network, services, kernel, user).
 3. Installs `chezmoi` and applies the dotfiles repo (set `dotfiles_branch` in `group_vars/all.yml` to clone a non-default branch on first init; set `dotfiles_use_encryption: true` to require an age identity for encrypted dotfiles).
 4. The dotfiles repo handles `mise` tool installs via `run_once_after`.
+
+When TLP and betterlockscreen are selected, the package role replaces the
+conflicting `power-profiles-daemon` and `i3lock` packages. AUR installation
+temporarily allows `target_user` to run `/usr/bin/pacman` without a password;
+the scoped sudoers fragment is removed whether the installation succeeds or
+fails.
 
 ## Architecture
 

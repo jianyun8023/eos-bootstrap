@@ -1,4 +1,10 @@
 ---
+- name: Remove legacy EndeavourOS Slick greeter override
+  ansible.builtin.file:
+    path: /etc/lightdm/lightdm.conf.d/10-eos-slick.conf
+    state: absent
+  tags: [display, lightdm]
+
 - name: Deploy lightdm.conf
   ansible.builtin.copy:
     dest: /etc/lightdm/lightdm.conf

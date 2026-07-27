@@ -41,6 +41,7 @@ setup_proxy
 DOTFILES_REPO=""
 DOTFILES_BRANCH=""
 DOTFILES_USE_ENCRYPTION="false"
+DOTFILES_SOURCE_DIR="${DOTFILES_SOURCE_DIR:-}"
 if [[ -f "${GROUP_VARS}" ]]; then
   DOTFILES_REPO="$(grep -E '^\s*dotfiles_repo:' "${GROUP_VARS}" \
     | sed -E 's/.*dotfiles_repo:\s*"?([^"]+)"?\s*/\1/')"
@@ -107,7 +108,13 @@ if [[ "${DOTFILES_USE_ENCRYPTION}" == "true" ]]; then
   fi
   log "age identity present, continuing with dotfiles"
 fi
-if [[ -d "${HOME}/.local/share/chezmoi" ]]; then
+if [[ -n "${DOTFILES_SOURCE_DIR}" ]]; then
+  if [[ ! -d "${DOTFILES_SOURCE_DIR}" ]]; then
+    die "DOTFILES_SOURCE_DIR does not exist: ${DOTFILES_SOURCE_DIR}"
+  fi
+  log "Applying dotfiles from local source: ${DOTFILES_SOURCE_DIR}"
+  chezmoi init --source "${DOTFILES_SOURCE_DIR}" --apply
+elif [[ -d "${HOME}/.local/share/chezmoi" ]]; then
   log "Dotfiles already initialized; running chezmoi update --init (pull + regen config + apply)"
   chezmoi update --init
 else

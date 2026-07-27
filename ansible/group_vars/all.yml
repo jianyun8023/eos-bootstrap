@@ -3,7 +3,7 @@
 
 # The user this machine is being bootstrapped for.
 # Hardcoded username — become:true makes ansible_facts.user_id return root.
-target_user: "yuez"
+target_user: "jianyun"
 
 # User groups target_user should be added to.
 # `keyd` is required for keyd-application-mapper to reach /run/keyd.socket.
@@ -28,13 +28,7 @@ optional_services: []
 # bare metal, cloud-init/qemu-guest-agent services are disabled and packages
 # removed. When in a VM, these services are enabled and started.
 # Adjust the list to match your VM environment's needs.
-vm_services:
-  - cloud-init-local.service
-  - cloud-init-main.service
-  - cloud-init-network.service
-  - cloud-config.service
-  - cloud-final.service
-  - qemu-guest-agent.service
+vm_services: []
 # Common examples for a Proxmox/QEMU guest:
 #   - cloud-init-local.service
 #   - cloud-init-main.service
@@ -44,11 +38,11 @@ vm_services:
 #   - qemu-guest-agent.service
 
 # URL of the dotfiles repo (consumed by bootstrap.sh, not by Ansible).
-dotfiles_repo: "https://github.com/zgs225/dotfiles.git"
+dotfiles_repo: "git@github.com:jianyun8023/dotfiles.git"
 
 # Branch of the dotfiles repo to clone on first init.
 # Leave empty to use the remote's default branch.
-dotfiles_branch: "master"
+dotfiles_branch: "main"
 
 # Set to true when the dotfiles repo contains age-encrypted files.
 # bootstrap.sh will refuse to run unless an age identity is present at

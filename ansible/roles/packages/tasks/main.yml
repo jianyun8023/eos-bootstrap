@@ -11,6 +11,11 @@
   ansible.builtin.include_tasks: thunar.yml
   tags: [packages, thunar]
 
+- name: Configure 1Password package signing key
+  ansible.builtin.include_tasks: onepassword.yml
+  when: "'1password' in aur_packages"
+  tags: [packages, aur, onepassword]
+
 - name: Install AUR packages
   ansible.builtin.include_tasks: aur.yml
   tags: [packages, aur]

@@ -58,7 +58,6 @@ pacman_packages:
   - tigervnc
   # i3wm ecosystem
   - i3-wm
-  - i3status
   - polybar
   - rofi
   - dunst
@@ -67,9 +66,13 @@ pacman_packages:
   - arandr
   - lxappearance
   - pamixer
+  - pavucontrol
+  - playerctl
+  - polkit-gnome
   - brightnessctl
   # Keyboard remapping (kernel evdev/uinput daemon, sub-1ms latency)
-  # python-xlib is required by keyd-application-mapper for X11 window-class detection.
+  # python-xlib is required by keyd-application-mapper for X11
+  # window-class detection.
   - keyd
   - python-xlib
   # Audio
@@ -88,6 +91,7 @@ pacman_packages:
   - noto-fonts-emoji
   - ttf-dejavu
   - adobe-source-han-serif-cn-fonts
+  - ttf-nerd-fonts-symbols-mono
   - kvantum
   - kvantum-qt5
   # Input method (Chinese pinyin via fcitx5)
@@ -99,6 +103,7 @@ pacman_packages:
   # Development
   - git
   - base-devel
+  - gnupg
   - ansible-lint
   - yamllint
   - python-yaml
@@ -112,6 +117,7 @@ pacman_packages:
   - eza
   - yazi
   - zoxide
+  - uv
   # Shell
   - zsh
   - zsh-completions
@@ -136,7 +142,6 @@ pacman_packages:
   - docker-buildx
   - docker-compose
   # Desktop Apps
-  - bitwarden
   - zathura
   - zathura-pdf-poppler
   - mpv
@@ -167,10 +172,9 @@ vm_pacman_packages:
   - spice-vdagent
 
 aur_packages:
-  - nerd-fonts
+  - 1password
+  - 1password-cli
   - google-chrome
-  - opencode
-  - kimi-code
   - cursor-bin
   - pi-bin
   - clash-verge-rev-bin
@@ -184,6 +188,29 @@ aur_packages:
   - rofi-greenclip
   - wemeet-bin
   - buku
+
+# Components from the stock EndeavourOS i3 desktop that are replaced by this
+# repository's Polybar/Rofi/WezTerm/maim/keyd setup.
+obsolete_desktop_packages:
+  - i3status
+  - i3blocks
+  - scrot
+  - xss-lock
+  - dmenu
+  - xfce4-terminal
+  - endeavouros-xfce4-terminal-colors
+  - xed
+  - xbindkeys
+  - dex
+  - numlockx
+  - eos-settings-i3wm
+  - arc-gtk-theme-eos
+  - eos-qogir-icons
+  - lightdm-slick-greeter
+  - eos-lightdm-slick-theme
+  - welcome
+  - eos-quickstart
+  - nwg-look
 
 # Chong Xi Small Seal (崇羲篆體) — system-installed font
 # Vendored archive lives at roles/packages/files/chongxi_seal.zip; the

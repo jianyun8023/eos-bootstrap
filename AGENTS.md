@@ -16,11 +16,11 @@ Boundary rule — do not violate:
 
 ## Layout (entry points)
 
-- `bootstrap.sh` — top-level entry; resolves `dotfiles_repo` / `dotfiles_branch` / `dotfiles_use_encryption` by **grepping `ansible/group_vars/all.yml`** (not via `ansible-inventory`). Keep those grep patterns stable.
+- `bootstrap.sh` — top-level entry; resolves `dotfiles_repo` / `dotfiles_branch` / `dotfiles_use_encryption` by **grepping `ansible/group_vars/all.yml`** (not via `ansible-inventory`). Keep those grep patterns stable. Set `DOTFILES_SOURCE_DIR` to apply an existing local dotfiles checkout instead of cloning `dotfiles_repo`.
 - `ansible/playbook.yml` — single playbook, `hosts: localhost`, `become: true`. Role order is significant: `packages → mise → services → network → kernel → user → display`.
 - `ansible/group_vars/all.yml` — the only place to set per-machine identity: `target_user`, `user_groups`, `optional_services`, `vm_services`, `dotfiles_repo`, `dotfiles_branch`, `dotfiles_use_encryption`.
 - `ansible/roles/services/vars/core_services.yml` — hardcoded, code-review required. `optional_services` (in `group_vars`) is the free-form list.
-- `ansible/roles/packages/vars/pacman_packages.yml` and `aur_packages.yml` — package lists. AUR is installed via `paru` with `become_user: target_user` and `PARU=1`; requires `paru` to already be on PATH (installed by `bootstrap.sh` step 2, not by Ansible).
+- `ansible/roles/packages/defaults/main.yml` — pacman, AUR, Thunar, and VM package lists. AUR is installed via `paru` with `become_user: target_user` and `PARU=1`; requires `paru` to already be on PATH (installed by `bootstrap.sh` step 2, not by Ansible).
 - `ansible/roles/network/files/nmconnection/*.nmconnection` — drop-in: any file here is `copy`-deployed to `/etc/NetworkManager/system-connections/` as `root:root 0600` and triggers a NetworkManager reload. `.gitkeep` is intentionally excluded by the glob.
 - `ansible/roles/user/files/polkit/{*.rules,*.pkla}` — same drop-in pattern to `/etc/polkit-1/rules.d/`.
 - `ansible/roles/kernel/templates/sysctl.d.conf.j2` — sysctl tunables (file-max, inotify, swappiness, BBR). Handler `Apply sysctl` runs `sysctl --system`.
@@ -66,6 +66,8 @@ tests/idempotency.sh
 - **Mise tool versions live in the dotfiles repo**, not here. `ansible/roles/mise/tasks/main.yml` only installs the `mise` binary; `mise install` runs from a `run_once_after_*` script in the dotfiles repo.
 - **`chezmoi update` alone does not regenerate `chezmoi.toml`.** The dotfiles repo's `.chezmoi.<format>.tmpl` is only re-rendered when `update --init` (or a fresh `init --apply`) runs. Plain `chezmoi update` does `git pull` + `apply` but leaves the existing config file untouched. `bootstrap.sh` uses `update --init` for that reason; if you ever invoke chezmoi by hand, prefer `chezmoi update --init` (or `chezmoi apply --init` after pulling) so template edits take effect.
 - **First run is not 100% Ansible-managed**: `paru` is bootstrapped by bash (no Ansible module for building it). The guard `if ! command -v paru` keeps re-runs safe.
+- **TLP and betterlockscreen replace stock conflicts.** Before installing TLP, `pacman.yml` removes the exact installed package `power-profiles-daemon`; before installing betterlockscreen, `aur.yml` removes the exact installed package `i3lock`. The checks use `pacman -Qq` because `tlp-pd` and `i3lock-color` satisfy package `Provides` and would make `pacman -Q <name>` produce false positives on later runs.
+- **AUR installation uses a temporary scoped sudoers fragment.** `aur.yml` allows `target_user` to run only `/usr/bin/pacman` without a password while `paru` runs, then removes `/etc/sudoers.d/99-eos-bootstrap-paru` in an `always` block.
 - **Single-machine scope is intentional.** No inventory generalization, no multi-host support — adding a second machine is explicitly out of scope per the design spec.
 - **`tests/idempotency.sh` greps the PLAY RECAP** for `changed=[1-9]`, not the task list. New roles must not produce `changed=` tasks on a steady-state re-run; if a task is inherently non-idempotent, add a `creates:`/`removes:` guard or use `changed_when: false`.
 - **No firewall (`ufw`) is installed or configured** by design. Don't add it without a spec change.
