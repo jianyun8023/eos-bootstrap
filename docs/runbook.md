@@ -238,6 +238,12 @@ authorization for background privilege prompts is vulnerable to
 CVE-2024-37408. The role rejects those services unless
 `fingerprint_allow_high_risk_pam: true` is also set explicitly.
 
+The i3 lock screen intentionally does not use `pam_fprintd`. The dotfiles
+`~/.config/i3/scripts/lock` wrapper starts `fprintd-verify` in parallel with
+`betterlockscreen`, allowing fingerprint and password authentication to remain
+responsive at the same time. Keep `i3lock` out of `fingerprint_pam_services` or
+the PAM module and helper will compete for the sensor.
+
 ## Update or reinstall a vendored system font
 
 The packages role installs a few non-package fonts by vendoring their

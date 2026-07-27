@@ -23,10 +23,10 @@ user_groups:
 # Services to enable in addition to core_services. Empty by default.
 optional_services: []
 
-# Fingerprint authentication is enabled only for the local screen locker.
-# High-risk privilege services (sudo, polkit-1, system-auth) stay disabled.
-fingerprint_pam_services:
-  - i3lock
+# The dotfiles lock helper runs fprintd-verify alongside i3lock, so i3lock must
+# not also claim the sensor through PAM. High-risk privilege services remain
+# disabled as well (sudo, polkit-1, system-auth).
+fingerprint_pam_services: []
 
 # Services relevant only in VM guests (Proxmox, QEMU/KVM, etc.).
 # VM detection is automatic (ansible_virtualization_type). When running on
