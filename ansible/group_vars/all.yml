@@ -23,6 +23,11 @@ user_groups:
 # Services to enable in addition to core_services. Empty by default.
 optional_services: []
 
+# Fingerprint authentication is enabled only for the local screen locker.
+# High-risk privilege services (sudo, polkit-1, system-auth) stay disabled.
+fingerprint_pam_services:
+  - i3lock
+
 # Services relevant only in VM guests (Proxmox, QEMU/KVM, etc.).
 # VM detection is automatic (ansible_virtualization_type). When running on
 # bare metal, cloud-init/qemu-guest-agent services are disabled and packages

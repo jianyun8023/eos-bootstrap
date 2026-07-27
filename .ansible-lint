@@ -1,0 +1,7 @@
+---
+profile: basic
+skip_list:
+  # Existing role variables are public inputs shared with group_vars.
+  - var-naming[no-role-prefix]
+  # The remaining systemctl commands need output or module-loading semantics.
+  - command-instead-of-module

@@ -18,6 +18,7 @@
       [lizardbyte]
       SigLevel = Optional
       Server = https://github.com/LizardByte/pacman-repo/releases/latest/download
+  register: packages_sunshine_repo_config
   when: sunshine_intel_check.rc == 0
   tags: [packages, sunshine]
 
@@ -27,14 +28,19 @@
     regexp: '^\s*Include\s*=\s*/etc/pacman\.d/lizardbyte\.conf'
     line: Include = /etc/pacman.d/lizardbyte.conf
     state: present
+  register: packages_sunshine_repo_include
   when: sunshine_intel_check.rc == 0
   tags: [packages, sunshine]
 
 - name: Update pacman cache after adding LizardByte repo
   community.general.pacman:
     update_cache: true
-    name: []
-  when: sunshine_intel_check.rc == 0
+  when:
+    - sunshine_intel_check.rc == 0
+    - >-
+      packages_sunshine_repo_config.changed
+      or packages_sunshine_repo_include.changed
+  changed_when: false
   tags: [packages, sunshine]
 
 - name: Install sunshine from LizardByte repo

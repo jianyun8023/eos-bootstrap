@@ -106,6 +106,7 @@ pacman_packages:
   - gnupg
   - ansible-lint
   - yamllint
+  - shellcheck
   - python-yaml
   - linux-headers
   - openssh
@@ -118,6 +119,9 @@ pacman_packages:
   - yazi
   - zoxide
   - uv
+  # X11 session lifecycle: XDG autostart and idle/suspend locking.
+  - dex
+  - xss-lock
   # Shell
   - zsh
   - zsh-completions
@@ -195,13 +199,11 @@ obsolete_desktop_packages:
   - i3status
   - i3blocks
   - scrot
-  - xss-lock
   - dmenu
   - xfce4-terminal
   - endeavouros-xfce4-terminal-colors
   - xed
   - xbindkeys
-  - dex
   - numlockx
   - eos-settings-i3wm
   - arc-gtk-theme-eos

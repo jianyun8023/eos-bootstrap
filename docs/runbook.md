@@ -206,6 +206,38 @@ pkill -USR1 -f keyd-application-mapper
 
 After the first bootstrap the user must re-login once so the `keyd` group is active for the mapper to reach `/run/keyd.socket`.
 
+## Configure fingerprint authentication
+
+The fingerprint role detects this workstation's Synaptics `06cb:00f0`
+sensor and installs the official Arch `fprintd` and `libfprint` packages. The
+older FocalTech `2808:a658` path remains separate because it needs a
+compatibility shim. Verify the native path before changing PAM:
+
+```bash
+fprintd-list "$USER"
+fprintd-enroll -f right-index-finger "$USER"
+fprintd-verify -f right-index-finger "$USER"
+```
+
+PAM integration is opt-in. After enrollment succeeds, set a per-service list
+in `ansible/group_vars/all.yml`, then run the fingerprint tag:
+
+```yaml
+fingerprint_pam_services:
+  - lightdm
+```
+
+```bash
+ansible-playbook ansible/playbook.yml --tags fingerprint --ask-become-pass
+```
+
+`pam_fprintd` serializes fingerprint and password authentication, so a failed
+or ignored scan delays the password prompt by `fingerprint_pam_timeout`
+seconds. Do not add `sudo`, `polkit-1`, or `system-auth`: fingerprint-only
+authorization for background privilege prompts is vulnerable to
+CVE-2024-37408. The role rejects those services unless
+`fingerprint_allow_high_risk_pam: true` is also set explicitly.
+
 ## Update or reinstall a vendored system font
 
 The packages role installs a few non-package fonts by vendoring their

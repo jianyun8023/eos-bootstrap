@@ -1,27 +1,39 @@
 ---
-# FocalTech FT9366 fingerprint sensor (2808:a658) via proprietary TOD driver.
-# Entire role is a no-op when the USB device is absent.
-# Heavy steps (pacman, git clone, compile, patchelf) are skipped when the
-# driver stack is already deployed.
-
-- name: Detect FocalTech FT9366 fingerprint sensor via lsusb
+- name: List attached USB devices for fingerprint detection
   ansible.builtin.shell: |
     set -o pipefail
-    lsusb 2>/dev/null | grep -q '{{ fingerprint_usb_vid }}:{{ fingerprint_usb_pid }}'
-  register: fingerprint_hw_check
+    lsusb 2>/dev/null | awk '{ print tolower($6) }'
+  register: fingerprint_usb_devices
   changed_when: false
-  failed_when: fingerprint_hw_check.rc not in [0, 1]
+  failed_when: fingerprint_usb_devices.rc != 0
   check_mode: false
   tags: [fingerprint]
 
-- name: Fingerprint sensor not detected — skipping role
+- name: Record detected fingerprint hardware
+  ansible.builtin.set_fact:
+    fingerprint_native_detected: >-
+      {{ (fingerprint_native_usb_ids | intersect(fingerprint_usb_devices.stdout_lines) | length) > 0 }}
+    fingerprint_focaltech_detected: >-
+      {{ fingerprint_focaltech_usb_id in fingerprint_usb_devices.stdout_lines }}
+  tags: [fingerprint]
+
+- name: Fingerprint sensor not detected - skipping setup
   ansible.builtin.debug:
-    msg: "No FocalTech FT9366 ({{ fingerprint_usb_vid }}:{{ fingerprint_usb_pid }}) found; skipping."
-  when: fingerprint_hw_check.rc != 0
+    msg: "No configured fingerprint sensor found; skipping package and driver setup."
+  when: not (fingerprint_native_detected or fingerprint_focaltech_detected)
+  tags: [fingerprint]
+
+- name: Install the distribution fingerprint stack
+  community.general.pacman:
+    name:
+      - fprintd
+      - libfprint
+    state: present
+  when: fingerprint_native_detected or fingerprint_focaltech_detected
   tags: [fingerprint]
 
 - name: Check if driver stack is already deployed
-  when: fingerprint_hw_check.rc == 0
+  when: fingerprint_focaltech_detected
   ansible.builtin.shell: |
     set -o pipefail
     test -f '{{ fingerprint_driver_path }}' &&
@@ -35,15 +47,13 @@
 
 - name: Build and deploy FocalTech FT9366 driver stack
   when:
-    - fingerprint_hw_check.rc == 0
+    - fingerprint_focaltech_detected
     - fingerprint_installed_check.rc != 0
   tags: [fingerprint]
   block:
-    - name: Install fprintd and build dependencies
+    - name: Install FocalTech build dependencies
       community.general.pacman:
         name:
-          - fprintd
-          - libfprint
           - gcc
           - pkgconf
           - libgusb
@@ -102,8 +112,8 @@
       changed_when: true
       notify: Restart fprintd
 
-- name: Ensure runtime configuration (fast path, always idempotent)
-  when: fingerprint_hw_check.rc == 0
+- name: Ensure FocalTech runtime configuration
+  when: fingerprint_focaltech_detected
   tags: [fingerprint]
   block:
     - name: Deploy udev rules (device access)
@@ -133,32 +143,55 @@
         group: root
         mode: "0755"
 
-    - name: Enable fprintd service
-      ansible.builtin.systemd:
-        name: fprintd.service
-        enabled: true
+- name: Flush driver handlers before probing fprintd
+  ansible.builtin.meta: flush_handlers
+  when: fingerprint_native_detected or fingerprint_focaltech_detected
+  tags: [fingerprint]
 
-    - name: Remove pam_fprintd from system-auth if present (breaks getty autologin)
-      ansible.builtin.lineinfile:
-        path: /etc/pam.d/system-auth
-        regexp: "^auth\\s+.*pam_fprintd\\.so"
-        state: absent
+- name: Verify that fprintd exposes the detected sensor
+  ansible.builtin.command:
+    cmd: "fprintd-list {{ target_user }}"
+  register: fingerprint_fprintd_probe
+  changed_when: false
+  when: fingerprint_native_detected or fingerprint_focaltech_detected
+  tags: [fingerprint]
 
-    - name: Remove pam_fprintd from i3lock if present (conflicts with lock-screen helper)
-      ansible.builtin.lineinfile:
-        path: /etc/pam.d/i3lock
-        regexp: "^auth\\s+.*pam_fprintd\\.so"
-        state: absent
+- name: Validate requested PAM fingerprint services
+  ansible.builtin.assert:
+    that:
+      - >-
+        fingerprint_allow_high_risk_pam or
+        (fingerprint_pam_services | intersect(fingerprint_high_risk_pam_services) | length == 0)
+      - "'has no fingers enrolled' not in fingerprint_fprintd_probe.stdout"
+    fail_msg: >-
+      Refusing PAM fingerprint configuration: enroll and verify a finger first;
+      sudo, polkit-1, and system-auth also require
+      fingerprint_allow_high_risk_pam=true because of CVE-2024-37408.
+  when:
+    - fingerprint_native_detected or fingerprint_focaltech_detected
+    - fingerprint_pam_services | length > 0
+  tags: [fingerprint]
 
-    - name: Configure PAM for fingerprint authentication (per-service only)
-      # i3lock is intentionally excluded: lock-screen fingerprint unlock is
-      # handled by a parallel fprintd-verify helper (dotfiles i3 lock.sh);
-      # pam_fprintd inside i3lock's PAM stack would fight it for the device.
-      ansible.builtin.lineinfile:
-        path: "/etc/pam.d/{{ item }}"
-        line: "auth      sufficient                    pam_fprintd.so"
-        insertbefore: "^auth"
-        state: present
-      loop:
-        - sudo
-      notify: Restart fprintd
+- name: Remove legacy PAM fingerprint rules unless explicitly enabled
+  ansible.builtin.lineinfile:
+    path: "/etc/pam.d/{{ item }}"
+    regexp: "^auth\\s+.*pam_fprintd\\.so.*$"
+    state: absent
+  loop: "{{ fingerprint_legacy_pam_services }}"
+  when:
+    - fingerprint_native_detected or fingerprint_focaltech_detected
+    - item not in fingerprint_pam_services
+  tags: [fingerprint]
+
+- name: Configure opt-in per-service PAM fingerprint authentication
+  ansible.builtin.lineinfile:
+    path: "/etc/pam.d/{{ item }}"
+    regexp: "^auth\\s+.*pam_fprintd\\.so.*$"
+    line: >-
+      auth sufficient pam_fprintd.so timeout={{ fingerprint_pam_timeout }}
+      max-tries={{ fingerprint_pam_max_tries }}
+    insertbefore: "^auth"
+    state: present
+  loop: "{{ fingerprint_pam_services }}"
+  when: fingerprint_native_detected or fingerprint_focaltech_detected
+  tags: [fingerprint]

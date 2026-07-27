@@ -4,6 +4,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ANSIBLE_DIR="${REPO_ROOT}/ansible"
 GROUP_VARS="${ANSIBLE_DIR}/group_vars/all.yml"
+export ANSIBLE_CONFIG="${ANSIBLE_DIR}/ansible.cfg"
 
 log() { printf '\033[1;34m[bootstrap]\033[0m %s\n' "$*"; }
 die() { printf '\033[1;31m[bootstrap]\033[0m %s\n' "$*" >&2; exit 1; }

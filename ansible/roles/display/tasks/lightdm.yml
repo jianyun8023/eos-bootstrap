@@ -23,8 +23,8 @@
     dest: /etc/lightdm/lightdm-gtk-greeter.conf
     content: |
       [greeter]
-      background = /usr/share/backgrounds/default.png
-      theme-name = catppuccin-glass
+      background = /usr/share/endeavouros/backgrounds/endeavouros-wallpaper.png
+      theme-name = Adwaita-dark
       icon-theme-name = Papirus-Dark
       font-name = LXGW WenKai 10
       position = 50%,center 55%,center

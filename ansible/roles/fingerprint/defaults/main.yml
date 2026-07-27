@@ -1,9 +1,10 @@
 ---
-# FocalTech FT9366 fingerprint sensor (Realtek RTS5811 USB bridge).
-# Only activates when the matching USB device is present.
+# USB devices supported directly by the distribution libfprint package.
+fingerprint_native_usb_ids:
+  - "06cb:00f0" # Synaptics Sensors, HP EliteBook 840 G9
 
-fingerprint_usb_vid: "2808"
-fingerprint_usb_pid: "a658"
+# FocalTech FT9366 uses a proprietary driver and compatibility shim.
+fingerprint_focaltech_usb_id: "2808:a658"
 
 fingerprint_shim_repo: "https://github.com/leopalladium/focaltech-ft9366-arch-shim.git"
 fingerprint_shim_repo_version: "main"
@@ -11,3 +12,19 @@ fingerprint_build_dir: "/var/lib/eos-bootstrap/focaltech-ft9366"
 
 fingerprint_driver_path: "/usr/lib/libfprint-2.so.2.0.0"
 fingerprint_shim_path: "/usr/lib/focaltech-shim.so"
+
+# PAM is deliberately opt-in per service. Do not add sudo, polkit-1, or
+# system-auth without accepting the fingerprint-hijacking risk described in
+# CVE-2024-37408. pam_fprintd cannot race password authentication in parallel.
+fingerprint_pam_services: []
+fingerprint_pam_timeout: 10
+fingerprint_pam_max_tries: 2
+fingerprint_allow_high_risk_pam: false
+fingerprint_high_risk_pam_services:
+  - sudo
+  - polkit-1
+  - system-auth
+fingerprint_legacy_pam_services:
+  - sudo
+  - system-auth
+  - i3lock
