@@ -70,6 +70,8 @@ pacman_packages:
   - playerctl
   - polkit-gnome
   - brightnessctl
+  - gsimplecal
+  - redshift
   # Keyboard remapping (kernel evdev/uinput daemon, sub-1ms latency)
   # python-xlib is required by keyd-application-mapper for X11
   # window-class detection.
@@ -108,6 +110,7 @@ pacman_packages:
   - yamllint
   - shellcheck
   - python-yaml
+  - python-jeepney
   - linux-headers
   - openssh
   - rsync
@@ -194,7 +197,8 @@ aur_packages:
   - buku
 
 # Components from the stock EndeavourOS i3 desktop that are replaced by this
-# repository's Polybar/Rofi/WezTerm/maim/keyd setup.
+# repository's Eww/Rofi/WezTerm/maim/keyd setup. Polybar remains installed as
+# an emergency fallback but is not started by the default i3 configuration.
 obsolete_desktop_packages:
   - i3status
   - i3blocks
