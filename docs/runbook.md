@@ -238,6 +238,12 @@ authorization for background privilege prompts is vulnerable to
 CVE-2024-37408. The role rejects those services unless
 `fingerprint_allow_high_risk_pam: true` is also set explicitly.
 
+This workstation explicitly enables `polkit-1` so 1Password system
+authentication can use the enrolled fingerprint. This applies to every polkit
+authorization prompt, not only 1Password, and accepts the CVE-2024-37408 risk.
+Password authentication remains available after the fingerprint timeout.
+`sudo` and `system-auth` remain excluded.
+
 The i3 lock screen intentionally does not use `pam_fprintd`. The dotfiles
 `~/.config/i3/scripts/lock` wrapper starts `fprintd-verify` in parallel with
 `betterlockscreen`, allowing fingerprint and password authentication to remain

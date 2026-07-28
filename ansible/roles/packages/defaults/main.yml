@@ -69,6 +69,8 @@ pacman_packages:
   - pavucontrol
   - playerctl
   - polkit-gnome
+  # Secret Service backend used by 1Password to persist MFA tokens.
+  - gnome-keyring
   - brightnessctl
   - gsimplecal
   - redshift

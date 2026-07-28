@@ -24,9 +24,12 @@ user_groups:
 optional_services: []
 
 # The dotfiles lock helper runs fprintd-verify alongside i3lock, so i3lock must
-# not also claim the sensor through PAM. High-risk privilege services remain
-# disabled as well (sudo, polkit-1, system-auth).
-fingerprint_pam_services: []
+# not also claim the sensor through PAM. polkit-1 is explicitly enabled for
+# 1Password system authentication after accepting the CVE-2024-37408 risk;
+# sudo and system-auth remain disabled.
+fingerprint_pam_services:
+  - polkit-1
+fingerprint_allow_high_risk_pam: true
 
 # Services relevant only in VM guests (Proxmox, QEMU/KVM, etc.).
 # VM detection is automatic (ansible_virtualization_type). When running on

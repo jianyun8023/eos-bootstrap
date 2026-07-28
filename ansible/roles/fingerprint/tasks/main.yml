@@ -183,6 +183,30 @@
     - item not in fingerprint_pam_services
   tags: [fingerprint]
 
+- name: Check for per-service PAM overrides
+  ansible.builtin.stat:
+    path: "/etc/pam.d/{{ item }}"
+  loop: "{{ fingerprint_pam_services }}"
+  register: fingerprint_pam_override_files
+  when: fingerprint_native_detected or fingerprint_focaltech_detected
+  tags: [fingerprint]
+
+- name: Seed missing PAM overrides from distribution defaults
+  ansible.builtin.copy:
+    src: "/usr/lib/pam.d/{{ item.item }}"
+    dest: "/etc/pam.d/{{ item.item }}"
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ fingerprint_pam_override_files.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - fingerprint_native_detected or fingerprint_focaltech_detected
+    - not item.stat.exists
+  tags: [fingerprint]
+
 - name: Configure opt-in per-service PAM fingerprint authentication
   ansible.builtin.lineinfile:
     path: "/etc/pam.d/{{ item }}"
