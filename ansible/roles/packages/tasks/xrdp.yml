@@ -81,6 +81,66 @@
     state: started
   tags: [xrdp]
 
+- name: Check whether firewalld is active
+  become: true
+  ansible.builtin.command:
+    cmd: systemctl is-active firewalld.service
+  register: packages_xrdp_firewalld_active
+  changed_when: false
+  failed_when: packages_xrdp_firewalld_active.rc not in [0, 3, 4]
+  check_mode: false
+  tags: [xrdp]
+
+- name: Check runtime firewalld RDP service
+  become: true
+  ansible.builtin.command:
+    cmd: >-
+      firewall-cmd --zone={{ xrdp_firewalld_zone }} --query-service=rdp
+  register: packages_xrdp_firewalld_runtime
+  changed_when: false
+  failed_when: packages_xrdp_firewalld_runtime.rc not in [0, 1]
+  when: packages_xrdp_firewalld_active.rc == 0
+  check_mode: false
+  tags: [xrdp]
+
+- name: Check permanent firewalld RDP service
+  become: true
+  ansible.builtin.command:
+    cmd: >-
+      firewall-cmd --permanent --zone={{ xrdp_firewalld_zone }}
+      --query-service=rdp
+  register: packages_xrdp_firewalld_permanent
+  changed_when: false
+  failed_when: packages_xrdp_firewalld_permanent.rc not in [0, 1]
+  when: packages_xrdp_firewalld_active.rc == 0
+  check_mode: false
+  tags: [xrdp]
+
+- name: Allow RDP permanently when firewalld is active
+  become: true
+  ansible.builtin.command:
+    cmd: >-
+      firewall-cmd --permanent --zone={{ xrdp_firewalld_zone }}
+      --add-service=rdp
+  when:
+    - not ansible_check_mode
+    - packages_xrdp_firewalld_active.rc == 0
+    - packages_xrdp_firewalld_permanent.rc == 1
+  changed_when: true
+  tags: [xrdp]
+
+- name: Allow RDP in the runtime firewalld zone
+  become: true
+  ansible.builtin.command:
+    cmd: >-
+      firewall-cmd --zone={{ xrdp_firewalld_zone }} --add-service=rdp
+  when:
+    - not ansible_check_mode
+    - packages_xrdp_firewalld_active.rc == 0
+    - packages_xrdp_firewalld_runtime.rc == 1
+  changed_when: true
+  tags: [xrdp]
+
 - name: Create target_user systemd user directory
   become: true
   become_user: "{{ target_user }}"

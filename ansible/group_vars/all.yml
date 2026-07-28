@@ -72,3 +72,4 @@ display_manager: lightdm
 # xrdp-sesman is disabled; no separate X sessions.
 # Package tigervnc provides x0vncserver; xrdp provides RDP listener.
 xrdp_enabled: true
+xrdp_firewalld_zone: public
