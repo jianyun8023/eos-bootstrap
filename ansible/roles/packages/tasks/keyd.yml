@@ -27,6 +27,16 @@
     mode: "0755"
   tags: [packages, keyd]
 
+- name: Deploy Mac client mappings for the Sunshine virtual keyboard
+  ansible.builtin.template:
+    src: keyd/sunshine.conf.j2
+    dest: /etc/keyd/sunshine.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload keyd
+  tags: [packages, keyd]
+
 # keyd-application-mapper ships inside the keyd package at /usr/bin, where a
 # pacman upgrade overwrites it. This patched copy lives in /usr/local/bin
 # (ahead of /usr/bin in PATH) and fixes the active-window detection:

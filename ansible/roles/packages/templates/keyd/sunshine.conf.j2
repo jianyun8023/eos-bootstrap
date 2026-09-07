@@ -1,0 +1,12 @@
+# {{ ansible_managed }}
+# Keep Sunshine's protocol modifiers intact; remap after virtual input delivery.
+[ids]
+k:beef:dead
+
+[main]
+leftmeta = layer(alt)
+rightmeta = layer(alt)
+leftalt = layer(meta)
+rightalt = layer(meta)
+
+{% include 'keyd/alt-bindings.conf.j2' %}

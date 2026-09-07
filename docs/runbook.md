@@ -4,7 +4,9 @@ Day-to-day operations for this bootstrap.
 
 ## Sunshine / Moonlight on the HP
 
-Sunshine uses Intel VAAPI with KMS capture. Dotfiles manage the user configuration
+Sunshine uses Intel VAAPI with X11 capture, which remains available when DPMS
+turns the display off (KMS fails with error 503 in that state on the HP).
+Dotfiles manage the user configuration
 and the desktop autostart entry; signing into i3 starts the packaged Sunshine user
 service. The services role allows streaming only from `sunshine_lan_cidr` via
 `--tags sunshine-firewall`. UPnP is disabled and the web UI accepts localhost only.
@@ -12,6 +14,12 @@ service. The services role allows streaming only from `sunshine_lan_cidr` via
 The Mac Moonlight client is paired with `HP-EliteBook-840-G9` at `192.168.2.132`.
 The initial client settings are 1920×1200, 60 FPS, 23 Mbps, and desktop mouse mode.
 VNC/RDP remain enabled while Moonlight is being evaluated.
+
+Keep Sunshine's own `keybindings` at their defaults. The dedicated keyd config
+matches only its `beef:dead` virtual keyboard: Mac Command enters the existing Alt
+shortcut layer, while Option becomes Super (`Option+A` selects a screenshot area).
+Moonlight must capture system keys. Mapping Alt to Super inside Sunshine causes
+it to synthesize an extra Alt for subsequent key events, breaking this shortcut.
 
 For the admin UI, forward `47990` over SSH and open `https://localhost:47990`.
 Initial admin credentials are in `~/.config/sunshine/admin-credentials.txt` on the

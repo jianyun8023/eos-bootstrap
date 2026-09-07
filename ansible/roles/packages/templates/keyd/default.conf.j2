@@ -4,27 +4,10 @@
 
 [ids]
 *
+-beef:dead
 
 [main]
 leftalt  = layer(alt)
 rightalt = layer(alt)
 
-[alt]
-c = C-c
-v = C-v
-x = C-x
-a = C-a
-w = C-w
-t = C-t
-z = C-z
-s = C-s
-# [ / ] also exist in [alt+shift]; without explicit bindings keyd intermittently swallows Alt+[ / Alt+].
-[ = A-[
-] = A-]
-
-[alt+shift]
-v = A-S-v
-c = A-S-c
-leftbrace  = A-S-[
-rightbrace = A-S-]
-l = A-S-l
+{% include 'keyd/alt-bindings.conf.j2' %}
