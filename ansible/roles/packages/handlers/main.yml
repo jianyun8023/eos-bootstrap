@@ -33,19 +33,10 @@
 
 - name: Restart x0vncserver
   become: true
-  become_user: "{{ target_user }}"
-  vars:
-    _uid: "{{ lookup('pipe', 'id -u ' + target_user) | trim | int }}"
   ansible.builtin.systemd:
     name: x0vncserver.service
-    scope: user
+    daemon_reload: true
     state: restarted
-  register: packages_x0vnc_restart
-  failed_when: false
-  changed_when: packages_x0vnc_restart is success
-  check_mode: false
-  environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ _uid }}"
 
 - name: Restart bluetooth
   become: true

@@ -322,6 +322,17 @@ ChatGPT in the application menu. EndeavourOS is outside OpenAI's supported
 distribution list; updates are managed with `paru`, and first launch requires
 signing in to a ChatGPT account.
 
+VNC runs as the system `x0vncserver.service`, using LightDM's X authority
+to share both the login screen and the current desktop. It listens only on
+loopback port 5900; xrdp uses it locally, and VNC clients connect through SSH:
+
+```bash
+ssh -N -L 127.0.0.1:15900:127.0.0.1:5900 jianyun@192.168.2.132
+```
+
+Connect the VNC viewer to `127.0.0.1:15900`. The tunnel authenticates with SSH;
+the LightDM screen still requires the Linux user's login credentials.
+
 `cypher-shell` is deferred: its AUR recipe requires unavailable
 `neo4j-community=2026.01.4` as of 2026-09-07.
 
