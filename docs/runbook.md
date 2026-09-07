@@ -16,10 +16,12 @@ The initial client settings are 1920×1200, 60 FPS, 23 Mbps, and desktop mouse m
 VNC/RDP remain enabled while Moonlight is being evaluated.
 
 Keep Sunshine's own `keybindings` at their defaults. The dedicated keyd config
-matches only its `beef:dead` virtual keyboard: Mac Command enters the existing Alt
+matches only its `beef:dead:fe1a1126` virtual keyboard: Mac Command enters the existing Alt
 shortcut layer, while Option becomes Super (`Option+A` selects a screenshot area).
 Moonlight must capture system keys. Mapping Alt to Super inside Sunshine causes
 it to synthesize an extra Alt for subsequent key events, breaking this shortcut.
+Use the complete keyboard ID reported by `keyd monitor`: the shorter `k:beef:dead`
+also matches Sunshine mice, touch and pen devices, blocking pointer movement.
 
 For the admin UI, forward `47990` over SSH and open `https://localhost:47990`.
 Initial admin credentials are in `~/.config/sunshine/admin-credentials.txt` on the

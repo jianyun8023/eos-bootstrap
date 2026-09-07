@@ -1,7 +1,8 @@
 # {{ ansible_managed }}
 # Keep Sunshine's protocol modifiers intact; remap after virtual input delivery.
 [ids]
-k:beef:dead
+# The full ID excludes Sunshine's mice/touch/pen, which also advertise keys.
+k:beef:dead:fe1a1126
 
 [main]
 leftmeta = layer(alt)
