@@ -15,7 +15,9 @@
     - role: services
     - role: network
     - role: kernel
+    - role: logging
     - role: power
+    - role: fan_profile
     - role: fingerprint
     - role: user
     - role: display

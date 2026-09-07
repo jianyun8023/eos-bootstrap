@@ -41,3 +41,9 @@
   community.general.pacman:
     name: "{{ obsolete_desktop_packages }}"
     state: absent
+
+- name: Remove pacman packages owned by mise
+  community.general.pacman:
+    name: "{{ packages_pacman_absent }}"
+    state: absent
+  when: packages_pacman_absent | length > 0

@@ -136,6 +136,11 @@ ansible-playbook ansible/playbook.yml --ask-become-pass
 
 Edit `~/.config/mise/config.toml` in the dotfiles repo, then `chezmoi update --init` triggers `run_once_after_*` which runs `mise install`.
 
+Toolchains like Go are managed **exclusively** by mise: the pacman `go`
+package is listed in `packages_pacman_absent` and removed on every
+bootstrap run, because an independently upgraded pacman Go clashes with
+mise's GOROOT (`compile: version ... does not match go tool version`).
+
 ## Smoke test (fresh VM)
 
 1. Boot EndeavourOS installer, install base system.
@@ -196,6 +201,21 @@ no-ops without a datasource, qemu-guest-agent no-ops without the virtio
    contains the upstream fix. Fully close every WezTerm GUI process after
    switching packages; new windows otherwise attach to the old GUI instance.
 
+## pacman refresh fails on the lizardbyte repo
+
+The `[lizardbyte]` repo (sunshine builds, configured in
+`/etc/pacman.d/lizardbyte.conf` by the packages role's `sunshine` task) fetches
+its database from github.com. When GitHub is unreachable, `pacman -Sy` fails on
+that one repo and aborts the whole play before later roles run.
+
+Workaround for urgent single packages:
+
+```bash
+pacman -S --needed <pkg>   # no refresh; the Arch mirrors' DBs usually sync fine
+```
+
+Then re-run the playbook once GitHub is reachable again.
+
 ## Configure keyd (system-wide key remapping)
 
 `keyd` runs as `keyd.service` (enabled in `core_services`) and reads its config from `/etc/keyd/default.conf`. The file is a Jinja2 template deployed by Ansible from `ansible/roles/packages/templates/keyd/default.conf.j2`. Re-running `./bootstrap.sh` (or `ansible-playbook ansible/playbook.yml`) hot-reloads via `keyd reload` (handler `Reload keyd`).
@@ -254,11 +274,10 @@ authorization prompt, not only 1Password, and accepts the CVE-2024-37408 risk.
 Password authentication remains available after the fingerprint timeout.
 `sudo` and `system-auth` remain excluded.
 
-The i3 lock screen intentionally does not use `pam_fprintd`. The dotfiles
-`~/.config/i3/scripts/lock` wrapper starts `fprintd-verify` in parallel with
-`betterlockscreen`, allowing fingerprint and password authentication to remain
-responsive at the same time. Keep `i3lock` out of `fingerprint_pam_services` or
-the PAM module and helper will compete for the sensor.
+The i3 lock screen follows the upstream password-only locker and does not
+use `pam_fprintd` or a fingerprint polling helper. Keep `i3lock` out of
+`fingerprint_pam_services`; the system fingerprint setup remains available
+to its explicitly configured services.
 
 ## Update or reinstall a vendored system font
 
@@ -285,3 +304,24 @@ To refresh (currently: 崇羲篆體 / Chong Xi Small Seal):
    ```bash
    fc-list | grep -i 'chong xi small seal'
    ```
+
+## HP upstream integration (2026-09-07)
+
+Upstream `zgs225/eos-bootstrap` through `302e1a6` is merged. The HP keeps
+its Synaptics fingerprint/PAM setup, Intel graphics, WezTerm nightly,
+XRDP fixes, and dotfiles repository identity. NVIDIA S0ix and upstream
+FocalTech changes are excluded.
+
+Logging, new package additions, keyd focus fixes, scx_lavd/irqbalance,
+Thunderbolt authorization and fan-profile are adopted. Zed is installed
+to match the existing dotfiles settings.
+
+`cypher-shell` is deferred: its AUR recipe requires unavailable
+`neo4j-community=2026.01.4` as of 2026-09-07.
+
+Suspend locking uses the upstream dotfiles artwork/locker and user service.
+The system dispatcher runs before sleep.target (before user.slice is frozen)
+and waits for the locker to confirm its keyboard/pointer grab. Normal logind lid handling stays enabled;
+`power_lid_watchdog_enabled: true` opts into upstream's sensor debounce
+only when lid chatter is confirmed. The power button uses upstream's
+short-press-ignore / long-press-poweroff policy.

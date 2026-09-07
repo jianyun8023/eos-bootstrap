@@ -1,0 +1,8 @@
+---
+logging_journald_dropin: /etc/systemd/journald.conf.d/10-eos.conf
+logging_journald_system_max_use_mb: 200
+logging_journald_max_retention: 1month
+logging_journald_compress: true
+
+logging_logrotate_compress: true
+logging_logrotate_timer: logrotate.timer

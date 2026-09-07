@@ -19,12 +19,12 @@ user_groups:
   - audio
   - tty
   - keyd
+  - plugdev
 
 # Services to enable in addition to core_services. Empty by default.
 optional_services: []
 
-# The dotfiles lock helper runs fprintd-verify alongside i3lock, so i3lock must
-# not also claim the sensor through PAM. polkit-1 is explicitly enabled for
+# The upstream dotfiles locker uses password-only i3lock. polkit-1 is enabled for
 # 1Password system authentication after accepting the CVE-2024-37408 risk;
 # sudo and system-auth remain disabled.
 fingerprint_pam_services:

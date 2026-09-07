@@ -1,0 +1,30 @@
+# Managed by Ansible — do not edit by hand.
+# Deliberately NOT covered: pacman.log, lightdm/*.log, wtmp/btmp.
+
+# copytruncate: Xorg keeps the fd open; a crashed X leaves the log growing.
+/var/log/Xorg.*.log {
+    rotate 2
+    compress
+    missingok
+    notifempty
+    copytruncate
+}
+
+/var/log/xrdp.log
+/var/log/xrdp-sesman.log {
+    rotate 4
+    compress
+    missingok
+    notifempty
+    copytruncate
+}
+
+/var/log/Calamares.log
+/var/log/endeavour-install.log {
+    size 1
+    rotate 1
+    compress
+    missingok
+    notifempty
+    nocreate
+}

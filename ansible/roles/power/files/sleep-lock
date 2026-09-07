@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+lock_user="${1:?target user required}"
+session=$(loginctl show-user "$lock_user" --property=Display --value)
+[[ -n "$session" ]] || exit 0
+[[ "$(loginctl show-session "$session" --property=Type --value)" == x11 ]] || exit 0
+lock_uid=$(id -u "$lock_user")
+# Run before sleep.target: system-sleep hooks execute after user.slice freezes.
+runuser -u "$lock_user" -- \
+    env XDG_RUNTIME_DIR="/run/user/$lock_uid" \
+        DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$lock_uid/bus" \
+        systemctl --user start lock-on-suspend.service

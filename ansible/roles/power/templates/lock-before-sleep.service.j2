@@ -1,0 +1,11 @@
+[Unit]
+Description=Lock graphical session before sleep
+Before=sleep.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/eos-lock-before-sleep {{ target_user }}
+TimeoutStartSec=40
+
+[Install]
+RequiredBy=sleep.target

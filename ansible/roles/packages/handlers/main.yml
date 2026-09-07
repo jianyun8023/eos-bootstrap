@@ -60,8 +60,42 @@
   changed_when: packages_keyd_reload.rc == 0
   failed_when: packages_keyd_reload.rc not in [0, 1]
 
+# Restart after config.toml changes so the new scheduler takes effect.
+- name: Restart scx_loader
+  become: true
+  ansible.builtin.systemd:
+    name: scx_loader.service
+    state: restarted
+
+# keyd-application-mapper runs inside the i3 session (not a unit), so this
+# only kills it; the mapper must be restarted by the user afterwards
+# ("keyd-application-mapper -d" or next login) for script changes to apply.
+- name: Restart keyd-application-mapper
+  become: true
+  ansible.builtin.command: pkill -f keyd-application-mapper
+  changed_when: false
+  failed_when: false
+
 - name: Refresh font cache
   become: true
   ansible.builtin.command:
     cmd: fc-cache -f
   changed_when: true
+
+- name: Reload modules-load for thunderbolt
+  become: true
+  ansible.builtin.command:
+    cmd: systemctl restart systemd-modules-load.service
+  changed_when: false
+
+- name: Reload udev for thunderbolt
+  become: true
+  ansible.builtin.command:
+    cmd: udevadm control --reload-rules
+  changed_when: true
+
+- name: Apply thunderbolt udev triggers
+  become: true
+  ansible.builtin.command:
+    cmd: udevadm trigger --action=add --subsystem-match=thunderbolt
+  changed_when: false

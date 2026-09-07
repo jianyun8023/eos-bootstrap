@@ -1,0 +1,38 @@
+---
+- name: Deploy logind lid debounce drop-in (delegates lid to lid-watchdog)
+  ansible.builtin.copy:
+    src: logind-lid-debounce.conf
+    dest: /etc/systemd/logind.conf.d/10-lid-debounce.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart logind
+  tags: [power]
+
+- name: Deploy lid-watchdog debounce script
+  ansible.builtin.copy:
+    src: lid-watchdog
+    dest: /usr/local/sbin/lid-watchdog
+    owner: root
+    group: root
+    mode: "0755"
+  notify: Restart lid-watchdog
+  tags: [power]
+
+- name: Deploy lid-watchdog service unit
+  ansible.builtin.copy:
+    src: lid-watchdog.service
+    dest: /etc/systemd/system/lid-watchdog.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload systemd for lid-watchdog
+  tags: [power]
+
+- name: Enable and start lid-watchdog service
+  ansible.builtin.systemd:
+    name: lid-watchdog.service
+    enabled: true
+    state: started
+    daemon_reload: true
+  tags: [power]

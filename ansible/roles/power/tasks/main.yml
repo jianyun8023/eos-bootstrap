@@ -1,6 +1,4 @@
 ---
-# Power management via TLP (profiles require TLP >= 1.9).
-
 - name: Read installed TLP version
   ansible.builtin.command:
     cmd: "tlp --version"
@@ -44,3 +42,56 @@
     mode: "0440"
     validate: "visudo -cf %s"
   tags: [power]
+
+- name: Ensure logind drop-in directory exists
+  ansible.builtin.file:
+    path: /etc/systemd/logind.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  tags: [power]
+
+- name: Deploy logind power key drop-in
+  ansible.builtin.copy:
+    src: logind-power-key.conf
+    dest: /etc/systemd/logind.conf.d/20-power-key.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart logind
+  tags: [power]
+
+- name: Configure optional lid sensor debounce
+  ansible.builtin.include_tasks:
+    file: lid-watchdog.yml
+    apply:
+      tags: [power, lid-watchdog]
+  when: power_lid_watchdog_enabled
+  tags: [power, lid-watchdog]
+
+- name: Deploy pre-sleep lock dispatcher
+  ansible.builtin.copy:
+    src: sleep-lock
+    dest: /usr/local/sbin/eos-lock-before-sleep
+    owner: root
+    group: root
+    mode: "0755"
+  tags: [power, lock]
+
+- name: Deploy pre-sleep lock unit
+  ansible.builtin.template:
+    src: lock-before-sleep.service.j2
+    dest: /etc/systemd/system/eos-lock-before-sleep.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload systemd for lid-watchdog
+  tags: [power, lock]
+
+- name: Require screen locking before sleep
+  ansible.builtin.systemd_service:
+    name: eos-lock-before-sleep.service
+    enabled: true
+    daemon_reload: true
+  tags: [power, lock]

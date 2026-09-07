@@ -45,6 +45,7 @@
 
 - name: Install pending AUR packages
   when:
+    - not ansible_check_mode
     - aur_packages | length > 0
     - packages_aur_all_installed.rc | default(1) != 0
   block:

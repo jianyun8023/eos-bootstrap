@@ -133,6 +133,10 @@ pacman_packages:
   - zsh-syntax-highlighting
   # Editors
   - neovim
+  - zed
+  - cairo
+  - pango
+  - gobject-introspection
   - tree-sitter-cli
   # Terminal
   - tmux
@@ -157,6 +161,46 @@ pacman_packages:
   - satty
 
 # Thunar file manager and extensions (X11 + i3wm default)
+  - tea
+  - strace
+  - ntfs-3g
+  - exfatprogs
+  - dosfstools
+  - xorg-server-xvfb
+  - github-cli
+  - rclone
+  - ffmpegthumbnailer
+  - chafa
+  - gpu-screen-recorder
+  - slop
+  - kubectl
+  - helm
+  - helmfile
+  - kubectx
+  - k9s
+  - argocd
+  - kustomize
+  - stern
+  - krew
+  - kubectl-cert-manager
+  - kubectl-ingress-nginx
+  - kubeseal
+  - kubeconform
+  - kube-linter
+  - popeye
+  - kompose
+  - minikube
+  - kind
+  - velero
+  - cilium-cli
+  - rbw
+  - scx-scheds
+  - scx-tools
+  - irqbalance
+
+packages_pacman_absent:
+  - go
+
 thunar_packages:
   - thunar
   - thunar-volman
@@ -203,6 +247,14 @@ aur_packages:
 # Components from the stock EndeavourOS i3 desktop that are replaced by this
 # repository's Eww/Rofi/WezTerm/maim/keyd setup. Polybar remains installed as
 # an emergency fallback but is not started by the default i3 configuration.
+  - xidlehook
+  - pinentry-rofi
+  - qqmusic-bin
+  - baidunetdisk-bin
+  - synology-drive-client
+  - jira-cli
+  # cypher-shell: AUR requires unavailable neo4j-community=2026.01.4 (2026-09-07).
+
 obsolete_desktop_packages:
   - i3status
   - i3blocks

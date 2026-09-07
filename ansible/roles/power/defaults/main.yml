@@ -1,0 +1,3 @@
+---
+# The HP uses normal logind lid handling and xss-lock. Enable only for sensor chatter.
+power_lid_watchdog_enabled: false

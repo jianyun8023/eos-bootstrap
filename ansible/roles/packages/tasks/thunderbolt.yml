@@ -1,0 +1,42 @@
+---
+# Do not install bolt/boltd — it fights the udev authorize-all rule.
+
+- name: Detect Thunderbolt/USB4 controller via lspci
+  ansible.builtin.shell: |
+    set -o pipefail
+    lspci 2>/dev/null | grep -qiE 'thunderbolt|usb4'
+  register: thunderbolt_hw_check
+  changed_when: false
+  failed_when: thunderbolt_hw_check.rc not in [0, 1]
+  check_mode: false
+  tags: [packages, thunderbolt]
+
+- name: No Thunderbolt/USB4 controller detected — skipping
+  ansible.builtin.debug:
+    msg: "No Thunderbolt/USB4 controller found via lspci; skipping."
+  when: thunderbolt_hw_check.rc != 0
+  tags: [packages, thunderbolt]
+
+- name: Deploy Thunderbolt hotplug auto-authorization
+  when: thunderbolt_hw_check.rc == 0
+  tags: [packages, thunderbolt]
+  block:
+    - name: Ensure thunderbolt module loads at boot
+      ansible.builtin.copy:
+        content: "thunderbolt\n"
+        dest: /etc/modules-load.d/thunderbolt.conf
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Reload modules-load for thunderbolt
+
+    - name: Deploy udev rule (auto-authorize routers on add)
+      ansible.builtin.copy:
+        src: thunderbolt/90-thunderbolt.rules
+        dest: /etc/udev/rules.d/90-thunderbolt.rules
+        owner: root
+        group: root
+        mode: "0644"
+      notify:
+        - Reload udev for thunderbolt
+        - Apply thunderbolt udev triggers
