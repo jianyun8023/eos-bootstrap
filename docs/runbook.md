@@ -2,6 +2,21 @@
 
 Day-to-day operations for this bootstrap.
 
+## Sunshine / Moonlight on the HP
+
+Sunshine uses Intel VAAPI with KMS capture. Dotfiles manage the user configuration
+and the desktop autostart entry; signing into i3 starts the packaged Sunshine user
+service. The services role allows streaming only from `sunshine_lan_cidr` via
+`--tags sunshine-firewall`. UPnP is disabled and the web UI accepts localhost only.
+
+The Mac Moonlight client is paired with `HP-EliteBook-840-G9` at `192.168.2.132`.
+The initial client settings are 1920×1200, 60 FPS, 23 Mbps, and desktop mouse mode.
+VNC/RDP remain enabled while Moonlight is being evaluated.
+
+For the admin UI, forward `47990` over SSH and open `https://localhost:47990`.
+Initial admin credentials are in `~/.config/sunshine/admin-credentials.txt` on the
+HP (mode 0600), outside Git. Pairings and private keys also stay outside Git.
+
 ## Add a package
 
 Pacman:

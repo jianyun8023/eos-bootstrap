@@ -1,0 +1,15 @@
+---
+- name: Allow Sunshine streams from the configured LAN
+  ansible.posix.firewalld:
+    zone: "{{ sunshine_firewalld_zone }}"
+    rich_rule: >-
+      rule family="ipv4" source address="{{ sunshine_lan_cidr }}"
+      port port="{{ item.port }}" protocol="{{ item.protocol }}" accept
+    permanent: true
+    immediate: true
+    state: "{{ sunshine_enabled | ternary('enabled', 'disabled') }}"
+  loop:
+    - {port: "47984", protocol: tcp}
+    - {port: "47989", protocol: tcp}
+    - {port: "48010", protocol: tcp}
+    - {port: "47998-48000", protocol: udp}

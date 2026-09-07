@@ -22,3 +22,7 @@
   when: item in all_unit_files.stdout
   loop_control:
     label: "{{ item }}"
+
+- name: Configure Sunshine LAN access
+  ansible.builtin.import_tasks: sunshine.yml
+  tags: [sunshine-firewall]
