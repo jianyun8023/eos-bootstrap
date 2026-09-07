@@ -231,6 +231,7 @@ aur_packages:
   - 1password-cli
   - google-chrome
   - cursor-bin
+  - chatgpt-desktop
   - pi-bin
   - clash-verge-rev-bin
   - betterlockscreen

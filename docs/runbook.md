@@ -316,6 +316,12 @@ Logging, new package additions, keyd focus fixes, scx_lavd/irqbalance,
 Thunderbolt authorization and fan-profile are adopted. Zed is installed
 to match the existing dotfiles settings.
 
+`chatgpt-desktop` installs OpenAI's Linux desktop preview with Codex through
+the AUR packaging of the official Linux binary. Launch `chatgpt` or select
+ChatGPT in the application menu. EndeavourOS is outside OpenAI's supported
+distribution list; updates are managed with `paru`, and first launch requires
+signing in to a ChatGPT account.
+
 `cypher-shell` is deferred: its AUR recipe requires unavailable
 `neo4j-community=2026.01.4` as of 2026-09-07.
 
