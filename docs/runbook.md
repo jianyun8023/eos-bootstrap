@@ -319,6 +319,10 @@ to match the existing dotfiles settings.
 `cypher-shell` is deferred: its AUR recipe requires unavailable
 `neo4j-community=2026.01.4` as of 2026-09-07.
 
+The HP hwmon backend exposes only `balanced`. When `hp-wmi` already reports
+automatic control (`pwm1_enable=2`), applying it leaves the value untouched;
+this driver rejects writing `2` back even as root.
+
 Suspend locking uses the upstream dotfiles artwork/locker and user service.
 The system dispatcher runs before sleep.target (before user.slice is frozen)
 and waits for the locker to confirm its keyboard/pointer grab. Normal logind lid handling stays enabled;

@@ -52,6 +52,11 @@ case "${1:-}" in
         f=
         wrote=0
         for f in $(pwm_files); do
+            # hp-wmi reports auto (2) but rejects writing that value back.
+            if [ "$(cat "$f" 2>/dev/null)" = 2 ]; then
+                wrote=1
+                continue
+            fi
             [ -w "$f" ] || continue
             printf '2\n' >"$f" 2>/dev/null && wrote=1
         done
