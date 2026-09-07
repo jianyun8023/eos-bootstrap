@@ -135,7 +135,6 @@ pacman_packages:
   - neovim
   - tree-sitter-cli
   # Terminal
-  - wezterm
   - tmux
   # Mise prerequisites
   - mise
@@ -181,6 +180,9 @@ vm_pacman_packages:
   - spice-vdagent
 
 aur_packages:
+  # Arch's stable 20240203 build has an intermittent X11 IME initialization
+  # bug fixed upstream in 2025; the official nightly binary includes that fix.
+  - wezterm-nightly-bin
   - 1password
   - 1password-cli
   - google-chrome

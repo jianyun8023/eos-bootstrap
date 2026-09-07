@@ -16,6 +16,23 @@
       packages_installed_before_betterlockscreen.stdout_lines | default([])
     - "'betterlockscreen' in aur_packages"
 
+- name: Check for stock WezTerm before installing wezterm-nightly-bin
+  ansible.builtin.command:
+    cmd: pacman -Qq
+  register: packages_installed_before_wezterm_nightly
+  changed_when: false
+  when: "'wezterm-nightly-bin' in aur_packages"
+
+- name: Remove stock WezTerm before installing wezterm-nightly-bin
+  community.general.pacman:
+    name: wezterm
+    state: absent
+  when:
+    - >-
+      'wezterm' in
+      packages_installed_before_wezterm_nightly.stdout_lines | default([])
+    - "'wezterm-nightly-bin' in aur_packages"
+
 - name: Check which AUR packages are already installed
   ansible.builtin.shell: |
     set -o pipefail

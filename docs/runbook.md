@@ -182,9 +182,19 @@ no-ops without a datasource, qemu-guest-agent no-ops without the virtio
 
 1. Confirm packages installed: `pacman -Q fcitx5 fcitx5-chinese-addons fcitx5-gtk fcitx5-qt fcitx5-configtool`
 2. Confirm daemon running: `pgrep -a fcitx5` (empty = not started; check i3 config has `exec --no-startup-id fcitx5 -d`)
-3. Confirm env vars in X session: `echo "$GTK_IM_MODULE $QT_IM_MODULE $XMODIFIERS $SDL_IM_MODULE"` should print `fcitx fcitx @im=fcitx fcitx`. If blank, `~/.xprofile` is not being sourced — verify `startx` chain in `~/.zprofile`.
-4. Run `fcitx5-diagnose` and read the output.
+3. From a terminal inside the i3 session, confirm the environment with
+   `echo "$GTK_IM_MODULE $QT_IM_MODULE $XMODIFIERS $SDL_IM_MODULE"`. It should
+   print `fcitx fcitx @im=fcitx fcitx`. If blank, `~/.xprofile` was not sourced;
+   check `/etc/lightdm/Xsession` for LightDM or the `startx` chain in
+   `~/.zprofile`. A TTY or SSH shell does not inherit the graphical environment.
+4. Run `fcitx5-diagnose` from the same graphical terminal and read the output.
 5. Open `fcitx5-configtool` to verify Pinyin is listed under "Available Input Methods" and ticked under "Current Input Methods".
+6. For intermittent failures limited to WezTerm, confirm
+   `pacman -Q wezterm-nightly-bin`.
+   Arch's stable `wezterm` package is the 20240203 build with a known X11 IME
+   initialization bug. This repo installs the official nightly binary, which
+   contains the upstream fix. Fully close every WezTerm GUI process after
+   switching packages; new windows otherwise attach to the old GUI instance.
 
 ## Configure keyd (system-wide key remapping)
 
